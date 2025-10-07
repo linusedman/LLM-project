@@ -7,4 +7,4 @@ langchain==0.3.27
 langchain-google-genai==2.1.10
 langchain-community==0.3.29
 langchain-huggingface==0.3.1
-sentance-transformers==5.1.0
+sentence-transformers==5.1.0
