@@ -48,8 +48,8 @@ def response_stream(inputs, history):
         history_text += f"Användare: {user_msg}\nAssistent: {bot_msg}\n"
 
     # Add context from RAG
-    context = db.similarity_search(user_text, k=10)
-    history_text += "\n\n" + "Kontext:\n" + "".join([chunk.page_content for chunk in context]) + "\n"
+    context = db.similarity_search(user_text, k=5)
+    history_text += "\n\n" + "Kontext:\n" + "".join([chunk.page_content + "\n Source: " + chunk.metadata["source"] for chunk in context]) + "\n"
     print(history_text)
 
     history_text += f"Användare: {user_text}\nAssistent:"
@@ -110,7 +110,7 @@ with gr.Blocks(fill_height=False, theme=gr.themes.Citrus(primary_hue=gr.themes.c
     chatbot = gr.ChatInterface(
         fn=response_stream,
         multimodal=True,
-        title="Din livsmedelsexpert v2",
+        title="Din livsmedelsexpert",
     )
 
 # From lab
@@ -121,4 +121,5 @@ with gr.Blocks(fill_height=False, theme=gr.themes.Citrus(primary_hue=gr.themes.c
 #    demo.close()
 #----------------------------------------------------------------------------------
 if __name__ == "__main__":
+
     demo.launch()
