@@ -107,7 +107,19 @@ def response_stream(inputs, history):
                 safety_settings=[
                     types.SafetySetting(
                         category="HARM_CATEGORY_DANGEROUS_CONTENT",
-                        threshold="BLOCK_NONE"
+                        threshold="BLOCK_MEDIUM_AND_ABOVE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_HARASSMENT",
+                        threshold="BLOCK_MEDIUM_AND_ABOVE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        threshold="BLOCK_MEDIUM_AND_ABOVE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_HATE_SPEECH",
+                        threshold="BLOCK_MEDIUM_AND_ABOVE"
                     )
                 ]
             )
@@ -126,7 +138,10 @@ def response_stream(inputs, history):
         yield "Ursäkta, ett fel uppstod! Kan du upprepa dig snälla!"
         return
     
-with gr.Blocks(fill_height=False, theme=gr.themes.Citrus(primary_hue=gr.themes.colors.amber, secondary_hue=gr.themes.colors.amber), css="""
+with gr.Blocks(
+    fill_height=False, 
+    theme=gr.themes.Citrus(primary_hue=gr.themes.colors.amber, secondary_hue=gr.themes.colors.amber), 
+    css="""
         /* Whole app background */
         .gradio-container {
         background-color: #cd4c06 !important;
