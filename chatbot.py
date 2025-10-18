@@ -31,7 +31,7 @@ db = FAISS.load_local("faiss_index_sv", embeddings, allow_dangerous_deserializat
 
 def response_stream(inputs, history):
     user_text = ""
-    user_image = None
+    user_images = []
 
     if isinstance(inputs, dict):
         user_text = inputs.get("text", "").lower()
@@ -44,7 +44,7 @@ def response_stream(inputs, history):
 
                     if mime_type and mime_type.startswith("image/"):
                         # Handle image input
-                        user_image = Image.open(file_path)
+                        user_images.append(Image.open(file_path))
 
                     elif mime_type and mime_type.startswith("text/"):
                         # Handle plain text input
@@ -90,8 +90,8 @@ def response_stream(inputs, history):
     history_text += f"Användare: {user_text}\nAssistent:"
     
     contents = []
-    if user_image is not None:
-        contents.append(user_image)
+    if len(user_images) > 0:
+        contents.extend(user_images)
 
     contents.append(history_text)
 
