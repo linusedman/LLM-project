@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Oct 15 11:06:24 2025
+Updated on Sat Oct 18 15:30:00 2025
+Chatbot using Gemini 2.5 Flash model with RAG and image input support.
 
 @author: Lovisa
+@coauthor: Agnes
 """
 
 import os
 from dotenv import load_dotenv
+load_dotenv()
 KEY = os.environ.get("GEMINI_API_KEY")
 from google import genai
 from google.genai import types
 import gradio as gr
-
+from PIL import Image
 client = genai.Client(api_key=KEY)  # here you can also pass the api_key directly using os.environ['GEMINI_API_KEY']
 
 default_model = "gemini-2.5-flash"
@@ -21,7 +25,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 embeddings = HuggingFaceEmbeddings(model_name="KBLab/sentence-bert-swedish-cased")
 
-db = FAISS.load_local("faiss_index_all", embeddings, allow_dangerous_deserialization=True)  # Load the vector database
+db = FAISS.load_local("faiss_index_sv", embeddings, allow_dangerous_deserialization=True)  # Load the vector database
 
 def response_stream(inputs, history):
     user_text = ""
