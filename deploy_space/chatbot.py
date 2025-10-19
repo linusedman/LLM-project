@@ -30,7 +30,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 embeddings = HuggingFaceEmbeddings(model_name="KBLab/sentence-bert-swedish-cased")
 
-db = FAISS.load_local("work/faiss_index_all_sv_cs1000", embeddings, allow_dangerous_deserialization=True)  # Load the vector database
+db = FAISS.load_local(FAISS_INDEX, embeddings, allow_dangerous_deserialization=True)  # Load the vector database
 
 def response_stream(inputs, history):
     user_text = ""
