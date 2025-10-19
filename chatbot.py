@@ -103,7 +103,9 @@ def response_stream(inputs, history):
             config=types.GenerateContentConfig(
                 temperature=0.0,
                 max_output_tokens=2000,
-                system_instruction="Du är en livsmedelsexpert med djup kunskap inom Sveriges och EUs lagar kring livsmedel. Besvara användarens frågor enligt kontexten, ta hänsyn till alla filer som användaren tillhandahåller. Var artig och pedagogisk, och avsluta varje meddelande med en lista av de relevanta förordningarna.",
+                system_instruction="Du är en livsmedelsexpert med djup kunskap inom Sveriges och EUs lagar kring livsmedel.\
+                      Besvara användarens frågor enligt kontexten, ta hänsyn till alla filer som användaren tillhandahåller.\
+                          Var artig och pedagogisk. OM några förordningar finns med i kontexten SÅ avsluta varje meddelande med en lista av de relevanta förordningarna.",
                 thinking_config=types.ThinkingConfig(thinking_budget=0),
                 safety_settings=[
                     types.SafetySetting(
