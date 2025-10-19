@@ -5,3 +5,5 @@
 /scraped_pdfs*
 /.gradio
 __pycache__
+
+/deploy_space/faiss_index*
