@@ -71,9 +71,8 @@ def response_stream(inputs, history):
     else:
         user_text = inputs.lower()
     
-    
     # special greetings from example file
-    if "hej" in user_text and not "hejdå":
+    if "hej" in user_text and not "hejdå" in user_text:
         yield "Hej, jag är din livsmedelsexpert. Vad kan jag hjälpa dig med?"
         return
     elif "hejdå" in user_text:
@@ -141,7 +140,7 @@ def response_stream(inputs, history):
         return
     
 with gr.Blocks(
-    fill_height=False, 
+    fill_height=True, 
     theme=gr.themes.Citrus(primary_hue=gr.themes.colors.amber, secondary_hue=gr.themes.colors.amber), 
     css="""
         /* Whole app background */
