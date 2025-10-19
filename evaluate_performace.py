@@ -1,11 +1,10 @@
 import statistics
 from time import perf_counter
-
+from itertools import combinations
 from chatbot import response_stream
 
-from langchain_community.vectorstores import FAISS  # "db" to store and retrieve embeddings
-from langchain_huggingface import HuggingFaceEmbeddings
-embeddings = HuggingFaceEmbeddings(model_name="KBLab/sentence-bert-swedish-cased")
+from sentence_transformers import SentenceTransformer, util
+embedding_model = SentenceTransformer("KBLab/sentence-bert-swedish-cased")
 
 def get_response(text_input):
     t_start = perf_counter()
@@ -33,7 +32,19 @@ def calc_latency_stats(latencies):
     avg = statistics.mean(lat_us)
     return f"Average={avg:.3f}µs | Median={median:.3f}µs"
 
+def embdding_cos_similarity(text_1, text_2):
+    embedding_1 = embedding_model.encode(text_1, convert_to_tensor=True)
+    embedding_2 = embedding_model.encode(text_2, convert_to_tensor=True)
+    return float(util.cos_sim(embedding_1, embedding_2).item())
+
+def pairwise_avg_similarity(responses):
+    if len(responses) < 2:
+        return 1.0
+    similarities = [embdding_cos_similarity(text_1, text_2) for text_1, text_2 in combinations(responses, 2)]
+    return sum(similarities) / len(similarities)
+
 responses, latencies = get_n_responses("hej", 5)
 print(responses)
 print(latencies)
+print(pairwise_avg_similarity(responses))
 print(calc_latency_stats(latencies))
