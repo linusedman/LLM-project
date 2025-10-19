@@ -169,13 +169,6 @@ with gr.Blocks(
         title="Din livsmedelsexpert",
     )
 
-# From lab
-# This part closes the demo server if it is already running (which
-# happens easily in notebooks) and prevents you from opening multiple
-# servers at the same time.
-#if "demo" in locals() and demo.is_running:
-#    demo.close()
-#----------------------------------------------------------------------------------
 if __name__ == "__main__":
 
     demo.launch(share=True)
