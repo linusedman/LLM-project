@@ -140,31 +140,76 @@ def response_stream(inputs, history):
     
 with gr.Blocks(
     fill_height=False, 
-    theme=gr.themes.Citrus(primary_hue=gr.themes.colors.amber, secondary_hue=gr.themes.colors.amber), 
     css="""
-        /* Whole app background */
-        .gradio-container {
-        background-color: #cd4c06 !important;
-        }
+        /* Colors commonly used on the website of livsmedelsverket and the kontrollwiki
+        orange-crayola: #f2712e;
+        white: #ffffff;
+        van-dyke: #4c3d38;
+        verdigris: #6cacad;
+        dark-cyan: #2a898b;
+        */
 
+        
         /* Title text */
         .gradio-container .prose h1 {
-        color: white !important;
+            color: #f2712e !important;
         }
 
-        /* Chat area background */
-        .gr-chatbot {
-        background-color: #ffffff !important; /* white */
+        /* Whole app background */
+        .gradio-container {
+            background-color: #6cacad !important;
         }
+
+        /* FUNKAR EJ??? HUR ÄNDRAR MAN CHAT INTERFACE??? */
+        #chat-bot .chat-interface { 
+            background-color: #f2712e;
+            color: #ffffff;
+            border-radius: 12px;
+        }
+        #chat-bot .multimodal-textbox textarea {
+            background-color: #ffffff;
+            color: #4c3d38;
+            border: 2px solid #6cacad;
+            border-radius: 8px;
+            padding: 6px;
+        }
+        #info-box .info-container {
+            background-color: #f8b88b;
+            color: #ffffff;
+            padding: 12px;
+            border: 2px solid #f2712e;
+            border-radius: 10px ;
+        }
+
+        #info-box h3 {
+            color: #f2712e !important;
         """) as demo:
-    chatbot = gr.ChatInterface(
-        fn=response_stream,
-        multimodal=True,
-        textbox=gr.MultimodalTextbox(
-            placeholder="Fråga mig något, så hjälper jag dig!",  
-            file_count="multiple"),
-        title="Din livsmedelsexpert",
-    )
+    with gr.Row():
+        with gr.Column(scale=3):
+            with gr.Group(elem_id="chat-bot"):
+                chatbot = gr.ChatInterface(
+                fn=response_stream,
+                multimodal=True,
+                textbox=gr.MultimodalTextbox(
+                    placeholder="Fråga mig något, så hjälper jag dig!",  
+                    file_count="multiple"),
+                title="Din livsmedelsexpert",
+                )
+        with gr.Column(scale=1):
+            with gr.Group(elem_id="info-box"):
+                gr.HTML(
+                    """
+                    <div class="info-container">
+                        <h3>Viktig information</h3>
+                            <p>Hej kära användare! Jag är din AI-livsmedelsexpert, här för att hjälpa dig med frågor kring livsmedel och relaterade lagar i Sverige och EU.<br><br>  
+                        Trots min expertis kan jag ibland göra misstag, så tveka inte att dubbelkolla viktig information. Jag hämtar kontext från konsoliderade 
+                        versioner av EU-lagar fram till september 2025, så för de allra senaste uppdateringarna rekommenderar jag att du konsulterar officiella 
+                        källor såsom EUR-Lex eller experter inom området.<br><br>  
+                        Tack för att du använder vår tjänst!</p>
+                    </div>
+                    """
+                )
+    
 
 # From lab
 # This part closes the demo server if it is already running (which
