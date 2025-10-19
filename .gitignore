@@ -4,3 +4,4 @@
 /faiss_index*
 /scraped_pdfs*
 /.gradio
+__pycache__
