@@ -194,6 +194,7 @@ with gr.Blocks(
             with gr.Group(elem_id="chat-bot"):
                 chatbot = gr.ChatInterface(
                 fn=response_stream,
+                chatbot=gr.Chatbot(height=700),
                 multimodal=True,
                 textbox=gr.MultimodalTextbox(
                     placeholder="Fråga mig något, så hjälper jag dig!",  
