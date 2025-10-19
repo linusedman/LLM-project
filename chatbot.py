@@ -83,9 +83,10 @@ def response_stream(inputs, history):
     for user_msg, bot_msg in history:
         history_text += f"Användare: {user_msg}\nAssistent: {bot_msg}\n"
 
-    # Add context from RAG
-    context = db.similarity_search(user_text, k=5)
-    history_text += "\n\n" + "Kontext:\n" + "".join([chunk.page_content + "\n Source: " + chunk.metadata["source"] for chunk in context]) + "\n"
+    # Add context from RAG if any text has been inputted by the user
+    if len(user_text) > 0:
+        context = db.similarity_search(user_text, k=5)
+        history_text += "\n\n" + "Kontext:\n" + "".join([chunk.page_content + "\n Source: " + chunk.metadata["source"] for chunk in context]) + "\n"
 
     # Add latest user input
     history_text += f"Användare: {user_text}\nAssistent:"
@@ -142,33 +143,78 @@ def response_stream(inputs, history):
         return
     
 with gr.Blocks(
-    fill_height=True, 
-    theme=gr.themes.Citrus(primary_hue=gr.themes.colors.amber, secondary_hue=gr.themes.colors.amber), 
+    fill_height=True,
+    theme=gr.themes.Citrus(
+        primary_hue=gr.themes.colors.amber,
+        secondary_hue=gr.themes.colors.amber
+    ),
     css="""
-        /* Whole app background */
-        .gradio-container {
-        background-color: #cd4c06 !important;
-        }
+    /* 1) Page-level */
+    .gradio-container { background:#cd4c06 !important; }
 
-        /* Title text */
-        .gradio-container .prose h1 {
-        color: white !important;
-        }
+    /* 2) Title */
+    #title h1 { 
+        color:white !important; 
+        text-align: center;      /* was: align-text: centre; */
+        margin-bottom:0.5rem; 
+    }
 
-        /* Chat area background */
-        .gr-chatbot {
-        background-color: #ffffff !important; /* white */
-        }
-        """) as demo:
-    chatbot = gr.ChatInterface(
-        fn=response_stream,
-        multimodal=True,
-        textbox=gr.MultimodalTextbox(
-            placeholder="Fråga mig något, så hjälper jag dig!",  
-            file_count="multiple"),
-        title="Din livsmedelsexpert",
-    )
+    /* 3) Chat area */
+    #chatwrap { max-width:1200px; margin:0 auto; }
+    #chatbot { background:#fff !important; border-radius:14px; }
+    #chatbot .message.user { background:#fff7ea; }
+    #chatbot .message.bot  { background:#f4f7ff; }
+
+    /* 4) Input row */
+    #inputbox { border:2px solid #ffc063; border-radius:12px; }
+    #inputbox textarea { padding:10px 12px; }
+
+    /* 5) Buttons (send/stop) */
+    #btnrow button { border-radius:12px; font-weight:600; }
+
+    /* Upload (paperclip) + Submit buttons near the textbox */
+    #inputbox button, 
+    #btnrow button {
+        background:#3070C1 !important;
+        color:#fff !important;
+        border-color:#3070C1 !important;
+    }
+
+    /* 6) File pills inside the textbox */
+    #inputbox .file-preview { border:1px dashed #ffb54d; }
+
+    /* 7) Optional footer */
+    #footer { color:#fff; opacity:0.9; text-align:center; padding:10px 0; }
+    """
+) as demo:
+    gr.Markdown("<h1>Din livsmedelsexpert</h1>", elem_id="title")
+
+    with gr.Column(elem_id="chatwrap"):
+        chat = gr.Chatbot(
+            label="Chatbot",
+            height=600,
+            elem_id="chatbot"
+        )
+
+        # You can pass a custom textbox to ChatInterface
+        box = gr.MultimodalTextbox(
+            placeholder="Fråga mig något, så hjälper jag dig!",
+            file_count="multiple",
+            elem_id="inputbox"
+        )
+
+        # Small row to catch buttons (ChatInterface renders them for you)
+        btnrow = gr.Row(elem_id="btnrow")
+
+        # Build the ChatInterface using your pre-made components
+        gr.ChatInterface(
+            fn=response_stream,
+            chatbot=chat,          # use the chatbot you created
+            textbox=box,           # use the textbox you created
+            title=None,            # we already render our own title
+            multimodal=True
+        )
 
 if __name__ == "__main__":
 
-    demo.launch(share=True)
+    demo.launch(share=False)
