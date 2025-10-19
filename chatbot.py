@@ -149,30 +149,22 @@ with gr.Blocks(
         secondary_hue=gr.themes.colors.amber
     ),
     css="""
-    /* 1) Page-level */
+    /* Page-level */
     .gradio-container { background:#cd4c06 !important; }
 
-    /* 2) Title */
+    /* Title */
     #title h1 { 
         color:white !important; 
-        text-align: center;      /* was: align-text: centre; */
-        margin-bottom:0.5rem; 
+        text-align: center;
     }
 
-    /* 3) Chat area */
+    /* Chat area */
     #chatwrap { max-width:1200px; margin:0 auto; }
     #chatbot { background:#fff !important; border-radius:14px; }
     #chatbot .message.user { background:#fff7ea; }
     #chatbot .message.bot  { background:#f4f7ff; }
 
-    /* 4) Input row */
-    #inputbox { border:2px solid #ffc063; border-radius:12px; }
-    #inputbox textarea { padding:10px 12px; }
-
-    /* 5) Buttons (send/stop) */
-    #btnrow button { border-radius:12px; font-weight:600; }
-
-    /* Upload (paperclip) + Submit buttons near the textbox */
+    /* Upload + Submit buttons */
     #inputbox button, 
     #btnrow button {
         background:#3070C1 !important;
@@ -180,11 +172,6 @@ with gr.Blocks(
         border-color:#3070C1 !important;
     }
 
-    /* 6) File pills inside the textbox */
-    #inputbox .file-preview { border:1px dashed #ffb54d; }
-
-    /* 7) Optional footer */
-    #footer { color:#fff; opacity:0.9; text-align:center; padding:10px 0; }
     """
 ) as demo:
     gr.Markdown("<h1>Din livsmedelsexpert</h1>", elem_id="title")
@@ -203,15 +190,15 @@ with gr.Blocks(
             elem_id="inputbox"
         )
 
-        # Small row to catch buttons (ChatInterface renders them for you)
+        # Small row to catch buttons
         btnrow = gr.Row(elem_id="btnrow")
 
         # Build the ChatInterface using your pre-made components
         gr.ChatInterface(
             fn=response_stream,
-            chatbot=chat,          # use the chatbot you created
-            textbox=box,           # use the textbox you created
-            title=None,            # we already render our own title
+            chatbot=chat,
+            textbox=box,
+            title=None,
             multimodal=True
         )
 
