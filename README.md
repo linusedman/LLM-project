@@ -1,3 +1,9 @@
+---
+title: LLM-project
+app_file: chatbot.py
+sdk: gradio
+sdk_version: 5.49.0
+---
 # LLM-project
 LLM project in the course Large Language Models and Societal Consequences of Artificial Intelligence - 1RT730
 
