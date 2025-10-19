@@ -3,3 +3,4 @@
 .DS_Store
 /faiss_index*
 /scraped_pdfs*
+/.gradio
