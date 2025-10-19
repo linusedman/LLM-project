@@ -3,9 +3,9 @@
 Created on Wed Oct 15 11:06:24 2025
 Updated on Sun Oct 19 13:32:50 2025
 
-@author: Lovisa
-@coauthor: Agnes
-@coauthor: Linus
+@author 1: Lovisa
+@author 2: Agnes
+@author 3: Linus
 """
 
 import os
@@ -30,7 +30,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 embeddings = HuggingFaceEmbeddings(model_name="KBLab/sentence-bert-swedish-cased")
 
-db = FAISS.load_local(FAISS_INDEX, embeddings, allow_dangerous_deserialization=True)  # Load the vector database
+db = FAISS.load_local("work/faiss_index_all_sv_cs1000", embeddings, allow_dangerous_deserialization=True)  # Load the vector database
 
 def response_stream(inputs, history):
     user_text = ""
@@ -73,9 +73,9 @@ def response_stream(inputs, history):
         user_text = inputs.lower()
     
     # special greetings from example file
-    if "hej" in user_text and not "hejdå" in user_text:
+    if user_text=="hej":
         yield "Hej, jag är din livsmedelsexpert. Vad kan jag hjälpa dig med?"
-        return
+        
     elif "hejdå" in user_text:
         yield "Hejdå! Ha en fortsatt trevlig dag :)"
         return
@@ -218,4 +218,4 @@ with gr.Blocks(
 
 if __name__ == "__main__":
 
-    demo.launch(share=True)
+    demo.launch(share=False)
