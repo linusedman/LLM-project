@@ -2,6 +2,7 @@ import statistics
 from time import perf_counter
 from itertools import combinations
 from chatbot import response_stream
+import pandas as pd
 
 from sentence_transformers import SentenceTransformer, util
 embedding_model = SentenceTransformer("KBLab/sentence-bert-swedish-cased")
@@ -25,12 +26,10 @@ def get_n_responses(text_input, n):
 
 def calc_latency_stats(latencies):
     if not latencies:
-        return "—"
-    # Convert seconds to microseconds
-    lat_us = [x * 1e6 for x in latencies]
-    median = statistics.median(lat_us)
-    avg = statistics.mean(lat_us)
-    return f"Average={avg:.3f}µs | Median={median:.3f}µs"
+        return "—", "-"
+    median = statistics.median(latencies)
+    avg = statistics.mean(latencies)
+    return avg, median
 
 def embdding_cos_similarity(text_1, text_2):
     embedding_1 = embedding_model.encode(text_1, convert_to_tensor=True)
@@ -43,8 +42,39 @@ def pairwise_avg_similarity(responses):
     similarities = [embdding_cos_similarity(text_1, text_2) for text_1, text_2 in combinations(responses, 2)]
     return sum(similarities) / len(similarities)
 
-responses, latencies = get_n_responses("hej", 5)
-print(responses)
-print(latencies)
-print(pairwise_avg_similarity(responses))
-print(calc_latency_stats(latencies))
+
+def main():
+    stats_df = pd.DataFrame(columns=["item", "prompt", "cos_sim", "latency_avg", "latency_median"])
+
+    # items = ["räkor", "hasselnötter", "griskött", "ekologiska tomater", "kantareller", "nötkött", "kött från utrotningshotade djur"]
+    items = ["räkor"]
+
+
+    open_question_prompts = [f"Jag ska sälja {item}, vad ska är viktigt att tänka på?" for item in items]
+    short_answer_prompts = [f"Jag ska sälja {item}, gör en lista av det jag MÅSTE inkludera på etiketten och ENDAST det!" for item in items]
+
+    num_responses = 10
+    print("Begin loop")
+    for item, open_question, short_answer in zip(items, open_question_prompts, short_answer_prompts):
+        print(f"Processing item: {item}")
+        print("Getting open question responses")
+        open_question_responses, open_question_latencies = get_n_responses(open_question, num_responses)
+        print("Getting short answer responses")
+        short_answer_responses, short_answer_latencies = get_n_responses(short_answer, num_responses)
+
+        print(f"Open question responses: {open_question_responses}")
+        print(f"Short answer responses: {short_answer_responses}")
+
+        print("Start calculating pairwise avg similarities")
+        open_question_sim = pairwise_avg_similarity(open_question_responses)
+        short_answer_sim = pairwise_avg_similarity(short_answer_responses)
+        print("Start calculating latensy stats")
+        open_question_latency_avg, open_question_latency_median = calc_latency_stats(open_question_latencies)
+        short_answer_latency_avg, short_answer_latency_median = calc_latency_stats(short_answer_latencies)
+
+        stats_df.loc[len(stats_df)] = [item, "open_question", open_question_sim, open_question_latency_avg, open_question_latency_median]
+        stats_df.loc[len(stats_df)] = [item, "short_answer", short_answer_sim, short_answer_latency_avg, short_answer_latency_median]
+    print("Done with loop")
+    print(stats_df)
+if __name__ == "__main__":
+    main()
