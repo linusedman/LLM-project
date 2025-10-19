@@ -7,10 +7,11 @@ Created on Wed Oct 15 11:06:24 2025
 
 import os
 from dotenv import load_dotenv
-KEY = os.environ.get("GEMINI_API_KEY")
 from google import genai
 from google.genai import types
 import gradio as gr
+load_dotenv()
+KEY = os.environ.get("GEMINI_API_KEY")
 
 client = genai.Client(api_key=KEY)  # here you can also pass the api_key directly using os.environ['GEMINI_API_KEY']
 
@@ -21,7 +22,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 embeddings = HuggingFaceEmbeddings(model_name="KBLab/sentence-bert-swedish-cased")
 
-db = FAISS.load_local("faiss_index_all", embeddings, allow_dangerous_deserialization=True)  # Load the vector database
+db = FAISS.load_local("faiss_index_all_sv_cs1000", embeddings, allow_dangerous_deserialization=True)  # Load the vector database
 
 def response_stream(inputs, history):
     user_text = ""
