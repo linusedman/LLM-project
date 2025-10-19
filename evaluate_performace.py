@@ -58,16 +58,17 @@ def pairwise_similarity_summary(responses):
 def calculate_stats(use_RAG=True):
     stats_df = pd.DataFrame(columns=["item", "prompt", "cos_sim", "latency_avg", "latency_median", "most_similar_prompts", "least_similar_prompts"])
 
-    items = ["räkor", "hasselnötter", "griskött", "ekologiska tomater", "kantareller", "nötkött", "kött från utrotningshotade djur"]
+    items = ["räkor", "hasselnötter", "griskött", "ekologiska tomater"]
     # items = ["räkor"]
 
 
     open_question_prompts = [f"Jag ska sälja {item}, vad ska är viktigt att tänka på?" for item in items]
     short_answer_prompts = [f"Jag ska sälja {item}, gör en lista av det jag MÅSTE inkludera på etiketten och ENDAST det!" for item in items]
 
-    num_responses = 100
+    num_responses = 10
     print("Begin loop")
     for item, open_question, short_answer in zip(items, open_question_prompts, short_answer_prompts):
+        print("-----------------------------------------------------")
         print(f"Processing item: {item}")
         print("Getting open question responses")
         open_question_responses, open_question_latencies = get_n_responses(open_question, num_responses, use_RAG)
@@ -83,6 +84,7 @@ def calculate_stats(use_RAG=True):
 
         stats_df.loc[len(stats_df)] = [item, "open_question", open_question_sim_avg, open_question_latency_avg, open_question_latency_median, open_question_most, open_question_least]
         stats_df.loc[len(stats_df)] = [item, "short_answer", short_answer_sim_avg, short_answer_latency_avg, short_answer_latency_median, short_answer_most, short_answer_least]
+        print(f"Done processing item: {item}\n\n")
     print("Done with loop")
 
     filename = "statistics/stats"
@@ -90,6 +92,7 @@ def calculate_stats(use_RAG=True):
         filename += "_no_RAG"
     print("Saving df")
     stats_df.to_csv(f"{filename}.csv", index=False)
+    print("df saved")
 
 if __name__ == "__main__":
     calculate_stats(True)
