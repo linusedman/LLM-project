@@ -5,6 +5,7 @@ Updated on Sat Oct 18 17:17:00 2025
 
 @author: Lovisa
 @coauthor: Agnes
+@coauthor: Linus
 """
 
 import os
@@ -19,7 +20,7 @@ from PIL import Image
 load_dotenv()
 KEY = os.environ.get("GEMINI_API_KEY")
 
-client = genai.Client(api_key=KEY)  # here you can also pass the api_key directly using os.environ['GEMINI_API_KEY']
+client = genai.Client(api_key=KEY)
 
 default_model = "gemini-2.5-flash"
 
