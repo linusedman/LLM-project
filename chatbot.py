@@ -144,64 +144,76 @@ def response_stream(inputs, history):
         return
     
 with gr.Blocks(
-    fill_height=True,
-    theme=gr.themes.Citrus(
-        primary_hue=gr.themes.colors.amber,
-        secondary_hue=gr.themes.colors.amber
-    ),
+    fill_height=True, 
     css="""
-    /* Page-level */
-    .gradio-container { background:#cd4c06 !important; }
+        /* Colors commonly used on the website of livsmedelsverket and the kontrollwiki
+        orange-crayola: #f2712e;
+        white: #ffffff;
+        van-dyke: #4c3d38;
+        verdigris: #6cacad;
+        dark-cyan: #2a898b;
+        */
 
-    /* Title */
-    #title h1 { 
-        color:white !important; 
-        text-align: center;
-    }
+        
+        /* Title text */
+        .gradio-container .prose h1 {
+            color: #f2712e !important;
+        }
 
-    /* Chat area */
-    #chatwrap { max-width:1200px; margin:0 auto; }
-    #chatbot { background:#fff !important; border-radius:14px; }
-    #chatbot .message.user { background:#fff7ea; }
-    #chatbot .message.bot  { background:#f4f7ff; }
+        /* Whole app background */
+        .gradio-container {
+            background-color: #6cacad !important;
+        }
 
-    /* Upload + Submit buttons */
-    #inputbox button, 
-    #btnrow button {
-        background:#3070C1 !important;
-        color:#fff !important;
-        border-color:#3070C1 !important;
-    }
+        /* FUNKAR EJ??? HUR ÄNDRAR MAN CHAT INTERFACE??? */
+        #chat-bot .chat-interface { 
+            background-color: #f2712e;
+            color: #ffffff;
+            border-radius: 12px;
+        }
+        #chat-bot .multimodal-textbox textarea {
+            background-color: #ffffff;
+            color: #4c3d38;
+            border: 2px solid #6cacad;
+            border-radius: 8px;
+            padding: 6px;
+        }
+        #info-box .info-container {
+            background-color: #f8b88b;
+            color: #ffffff;
+            padding: 12px;
+            border: 2px solid #f2712e;
+            border-radius: 10px ;
+        }
 
-    """
-) as demo:
-    gr.Markdown("<h1>Din livsmedelsexpert</h1>", elem_id="title")
-
-    with gr.Column(elem_id="chatwrap"):
-        chat = gr.Chatbot(
-            label="Chatbot",
-            height=600,
-            elem_id="chatbot"
-        )
-
-        # You can pass a custom textbox to ChatInterface
-        box = gr.MultimodalTextbox(
-            placeholder="Fråga mig något, så hjälper jag dig!",
-            file_count="multiple",
-            elem_id="inputbox"
-        )
-
-        # Small row to catch buttons
-        btnrow = gr.Row(elem_id="btnrow")
-
-        # Build the ChatInterface using your pre-made components
-        gr.ChatInterface(
-            fn=response_stream,
-            chatbot=chat,
-            textbox=box,
-            title=None,
-            multimodal=True
-        )
+        #info-box h3 {
+            color: #f2712e !important;
+        """) as demo:
+    with gr.Row():
+        with gr.Column(scale=3):
+            with gr.Group(elem_id="chat-bot"):
+                chatbot = gr.ChatInterface(
+                fn=response_stream,
+                multimodal=True,
+                textbox=gr.MultimodalTextbox(
+                    placeholder="Fråga mig något, så hjälper jag dig!",  
+                    file_count="multiple"),
+                title="Din livsmedelsexpert",
+                )
+        with gr.Column(scale=1):
+            with gr.Group(elem_id="info-box"):
+                gr.HTML(
+                    """
+                    <div class="info-container">
+                        <h3>Viktig information</h3>
+                            <p>Hej kära användare! Jag är din AI-livsmedelsexpert, här för att hjälpa dig med frågor kring livsmedel och relaterade lagar i Sverige och EU.<br><br>  
+                        Trots min expertis kan jag ibland göra misstag, så tveka inte att dubbelkolla viktig information. Jag hämtar kontext från konsoliderade 
+                        versioner av EU-lagar fram till september 2025, så för de allra senaste uppdateringarna rekommenderar jag att du konsulterar officiella 
+                        källor såsom EUR-Lex eller experter inom området.<br><br>  
+                        Tack för att du använder vår tjänst!</p>
+                    </div>
+                    """
+                )
 
 if __name__ == "__main__":
 
