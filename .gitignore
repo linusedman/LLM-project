@@ -3,8 +3,3 @@
 .DS_Store
 /faiss_index*
 /scraped_pdfs*
-.env
-.venv
-.DS_Store
-/faiss_index*
-/scraped*
