@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Oct 15 11:06:24 2025
+Updated on Sat Oct 18 17:17:00 2025
 
 @author: Lovisa
+@coauthor: Agnes
 """
 
 import os
@@ -10,7 +12,10 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 import gradio as gr
-load_dotenv()
+import mimetypes
+import pdfplumber
+from PIL import Image
+
 KEY = os.environ.get("GEMINI_API_KEY")
 
 client = genai.Client(api_key=KEY)  # here you can also pass the api_key directly using os.environ['GEMINI_API_KEY']
@@ -26,15 +31,44 @@ db = FAISS.load_local("faiss_index_all_sv_cs1000", embeddings, allow_dangerous_d
 
 def response_stream(inputs, history):
     user_text = ""
-    user_image = None
-        
-    if type(inputs) == dict:
+    user_images = []
+
+    if isinstance(inputs, dict):
         user_text = inputs.get("text", "").lower()
         files = inputs.get("files", [])
-        if files:  # only uses the first uploaded image
-            user_image = Image.open(files[0])
+
+        if files:
+            for file_path in files:
+                try:
+                    mime_type, _ = mimetypes.guess_type(file_path) # Guesses "the filetype based on its filename, path or URL, given by url"
+
+                    if mime_type and mime_type.startswith("image/"):
+                        # Handle image input
+                        user_images.append(Image.open(file_path))
+
+                    elif mime_type and mime_type.startswith("text/"):
+                        # Handle plain text input
+                        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                            user_text += "\n" + f.read()
+
+                    elif mime_type == "application/pdf" or file_path.lower().endswith(".pdf"):
+                        # Handle PDF input
+                        try:
+                            with pdfplumber.open(file_path) as pdf:
+                                pdf_text = "\n".join(page.extract_text() or "" for page in pdf.pages)
+                                user_text += "\n" + pdf_text
+                        except Exception as e:
+                            user_text += f"\n(Kunde inte läsa PDF: {e})"
+
+                    else:
+                        # Unsupported file types
+                        user_text += "\n(Filtypen stöds inte ännu.)"
+                except Exception as e:
+                    user_text += "\nFel vid läsning av fil {file_path}: {e}"
+
     else:
         user_text = inputs.lower()
+    
     
     # special greetings from example file
     if "hej" in user_text and not "hejdå":
@@ -51,13 +85,13 @@ def response_stream(inputs, history):
     # Add context from RAG
     context = db.similarity_search(user_text, k=5)
     history_text += "\n\n" + "Kontext:\n" + "".join([chunk.page_content + "\n Source: " + chunk.metadata["source"] for chunk in context]) + "\n"
-    print(history_text)
 
+    # Add latest user input
     history_text += f"Användare: {user_text}\nAssistent:"
     
     contents = []
-    if user_image is not None:
-        contents.append(user_image)
+    if len(user_images) > 0:
+        contents.extend(user_images)
 
     contents.append(history_text)
 
@@ -68,12 +102,24 @@ def response_stream(inputs, history):
             config=types.GenerateContentConfig(
                 temperature=0.0,
                 max_output_tokens=2000,
-                system_instruction="Du är en livsmedelsexpert med djup kunskap inom Sveriges och EUs lagar kring livsmedel. Besvara användarens frågor enligt kontexten. Var artig och pedagogisk, och avsluta varje meddelande med en lista av de relevanta förordningarna.",
+                system_instruction="Du är en livsmedelsexpert med djup kunskap inom Sveriges och EUs lagar kring livsmedel. Besvara användarens frågor enligt kontexten, ta hänsyn till alla filer som användaren tillhandahåller. Var artig och pedagogisk, och avsluta varje meddelande med en lista av de relevanta förordningarna.",
                 thinking_config=types.ThinkingConfig(thinking_budget=0),
                 safety_settings=[
                     types.SafetySetting(
                         category="HARM_CATEGORY_DANGEROUS_CONTENT",
-                        threshold="BLOCK_NONE"
+                        threshold="BLOCK_MEDIUM_AND_ABOVE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_HARASSMENT",
+                        threshold="BLOCK_MEDIUM_AND_ABOVE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        threshold="BLOCK_MEDIUM_AND_ABOVE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_HATE_SPEECH",
+                        threshold="BLOCK_MEDIUM_AND_ABOVE"
                     )
                 ]
             )
@@ -89,10 +135,13 @@ def response_stream(inputs, history):
 
     except Exception as e:
         # Handle streaming failure without crashing the chatbot
-        yield "Ursäkta, kan du upprepa dig snälla :)"
+        yield "Ursäkta, ett fel uppstod! Kan du upprepa dig snälla!"
         return
     
-with gr.Blocks(fill_height=False, theme=gr.themes.Citrus(primary_hue=gr.themes.colors.amber, secondary_hue=gr.themes.colors.amber), css="""
+with gr.Blocks(
+    fill_height=False, 
+    theme=gr.themes.Citrus(primary_hue=gr.themes.colors.amber, secondary_hue=gr.themes.colors.amber), 
+    css="""
         /* Whole app background */
         .gradio-container {
         background-color: #cd4c06 !important;
@@ -111,6 +160,9 @@ with gr.Blocks(fill_height=False, theme=gr.themes.Citrus(primary_hue=gr.themes.c
     chatbot = gr.ChatInterface(
         fn=response_stream,
         multimodal=True,
+        textbox=gr.MultimodalTextbox(
+            placeholder="Fråga mig något, så hjälper jag dig!",  
+            file_count="multiple"),
         title="Din livsmedelsexpert",
     )
 
@@ -123,4 +175,4 @@ with gr.Blocks(fill_height=False, theme=gr.themes.Citrus(primary_hue=gr.themes.c
 #----------------------------------------------------------------------------------
 if __name__ == "__main__":
 
-    demo.launch()
+    demo.launch(share=True)
