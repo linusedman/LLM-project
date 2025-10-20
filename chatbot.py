@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Oct 15 11:06:24 2025
-Updated on Sun Oct 19 13:32:50 2025
+Updated on Sun Oct 20 16:04:10 2025
 
 @author 1: Lovisa
 @author 2: Agnes
@@ -30,7 +30,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 embeddings = HuggingFaceEmbeddings(model_name="KBLab/sentence-bert-swedish-cased")
 
-db = FAISS.load_local("work/faiss_index_all_sv_cs1000", embeddings, allow_dangerous_deserialization=True)  # Load the vector database
+db = FAISS.load_local(FAISS_INDEX, embeddings, allow_dangerous_deserialization=True)  # Load the vector database
 
 def response_stream(inputs, history):
     user_text = ""
@@ -155,22 +155,27 @@ with gr.Blocks(
         */
 
         
+        /* Top title */
+        .title {
+            text-align: center;
+            color: #f2712e;
+            font-size: 60px;
+            font-weight:bold;
+            border: 5px white;
+
+        }
+        
         /* Title text */
         .gradio-container .prose h1 {
             color: #f2712e !important;
         }
 
+    
         /* Whole app background */
         .gradio-container {
             background-color: #6cacad !important;
         }
 
-        /* FUNKAR EJ??? HUR ÄNDRAR MAN CHAT INTERFACE??? */
-        #chat-bot .chat-interface { 
-            background-color: #f2712e;
-            color: #ffffff;
-            border-radius: 12px;
-        }
         #chat-bot .multimodal-textbox textarea {
             background-color: #ffffff;
             color: #4c3d38;
@@ -189,12 +194,17 @@ with gr.Blocks(
         #info-box h3 {
             color: #f2712e !important;
         """) as demo:
+    gr.HTML(
+        """
+        <div class="title">FoodLex</div>
+        """
+        )
     with gr.Row():
         with gr.Column(scale=3):
             with gr.Group(elem_id="chat-bot"):
                 chatbot = gr.ChatInterface(
                 fn=response_stream,
-                chatbot=gr.Chatbot(height=700),
+                chatbot=gr.Chatbot(height=600),
                 multimodal=True,
                 textbox=gr.MultimodalTextbox(
                     placeholder="Fråga mig något, så hjälper jag dig!",  
