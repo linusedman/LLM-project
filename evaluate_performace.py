@@ -1,5 +1,5 @@
 import statistics
-from time import perf_counter
+from time import perf_counter, sleep
 from itertools import combinations
 from chatbot import response_stream
 from model_no_RAG import response_stream_no_RAG
@@ -15,6 +15,7 @@ def get_response(text_input, func=response_stream):
         response = chunk
     t_end = perf_counter()
     latency = t_end - t_start
+    sleep(5)
     return response, latency
 
 def get_n_responses(text_input, n, use_RAG=True):
@@ -58,8 +59,9 @@ def pairwise_similarity_summary(responses):
 def calculate_stats(use_RAG=True):
     stats_df = pd.DataFrame(columns=["item", "prompt", "cos_sim", "latency_avg", "latency_median", "most_similar_prompts", "least_similar_prompts"])
 
-    items = ["räkor", "hasselnötter", "griskött", "ekologiska tomater"]
+    # items = ["räkor", "kött", "tomater"]
     # items = ["räkor"]
+    items = ["nötkött"]
 
 
     open_question_prompts = [f"Jag ska sälja {item}, vad ska är viktigt att tänka på?" for item in items]
@@ -87,7 +89,7 @@ def calculate_stats(use_RAG=True):
         print(f"Done processing item: {item}\n\n")
     print("Done with loop")
 
-    filename = "statistics/stats"
+    filename = f"statistics/stats_{item[0]}"
     if not use_RAG:
         filename += "_no_RAG"
     print("Saving df")
@@ -95,5 +97,5 @@ def calculate_stats(use_RAG=True):
     print("df saved")
 
 if __name__ == "__main__":
-    calculate_stats(True)
+    # calculate_stats(True)
     calculate_stats(False)
