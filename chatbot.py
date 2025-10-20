@@ -155,11 +155,22 @@ with gr.Blocks(
         */
 
         
+        /* Top title */
+        .title {
+            text-align: center;
+            color: #f2712e;
+            font-size: 60px;
+            font-weight:bold;
+            border: 5px white;
+
+        }
+        
         /* Title text */
         .gradio-container .prose h1 {
             color: #f2712e !important;
         }
 
+    
         /* Whole app background */
         .gradio-container {
             background-color: #6cacad !important;
@@ -183,12 +194,17 @@ with gr.Blocks(
         #info-box h3 {
             color: #f2712e !important;
         """) as demo:
+    gr.HTML(
+        """
+        <div class="title">FoodLex</div>
+        """
+        )
     with gr.Row():
         with gr.Column(scale=3):
             with gr.Group(elem_id="chat-bot"):
                 chatbot = gr.ChatInterface(
                 fn=response_stream,
-                chatbot=gr.Chatbot(height=700),
+                chatbot=gr.Chatbot(height=600),
                 multimodal=True,
                 textbox=gr.MultimodalTextbox(
                     placeholder="Fråga mig något, så hjälper jag dig!",  
